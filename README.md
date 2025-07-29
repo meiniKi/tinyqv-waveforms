@@ -18,11 +18,11 @@ Each peripheral is allocated a range in the system's memory map, so that the CPU
 
 The peripheral also has access to the 8 input and 8 output pins available to Tiny Tapeout designs.  The peripheral infrastructure can select which peripheral is in control of each output pin individually, so multiple peripherals can be used together.  The bidirectional pins are not available to the peripherals as they are used by TinyQV to access the flash and RAM.
 
-The interface to the peripheral is [here](src/peripheral.v#L13-L27).
+The interface to the peripheral is [here](src/peripheral.sv#L13-L27).
 
 ## How do I get started?
 
-Implement your peripheral by replacing the implementation in the [example](src/peripheral.v#L29-L49) with your own implementation.  You may create additional modules.
+Implement your peripheral by replacing the implementation in the [example](src/peripheral.sv#L29-L49) with your own implementation.  You may create additional modules.
 
 Test your peripheral by replacing and extending the [example test](test/test.py#L33-L51).
 
