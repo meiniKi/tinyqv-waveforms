@@ -45,4 +45,11 @@ module tb ();
       .rst_n  (rst_n)     // not reset
   );
 
+  ssd1306_spi4 i_ssd1306_spi4 (
+    .cs_in  ( uio_out[3] ),
+    .sdi_i  ( uio_out[2] ),
+    .sck_i  ( uio_out[1] ),
+    .dc_i   ( uio_out[4] )
+  );
+
 endmodule

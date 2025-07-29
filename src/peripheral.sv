@@ -65,6 +65,8 @@ module tqvp_meiniKi_waveforms (
   assign uo_out[1]    = sck_r;
   assign uo_out[2]    = tx_r[7];
   assign uo_out[3]    = cs_r & (state_r != SPI_TX) & (state_n != SPI_TX);
+  assign uo_out[4]    = oled_dc_r;
+  assign uo_out[7:5]  = 'b0;
 
   assign tick         = (~|cnt_presc_r);
   assign done         = (state_r == SPI_TX) & (state_n != SPI_TX);
