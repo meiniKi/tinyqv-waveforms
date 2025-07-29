@@ -1,7 +1,7 @@
 // Copyright (c) 2025 Meinhard Kissich
 // SPDX-License-Identifier: MIT
 // -----------------------------------------------------------------------------
-// File  :  peripheral.v
+// File  :  peripheral.sv
 // Usage :  SSD1306 OLED logic analyzer / waveform plotter
 //
 // -----------------------------------------------------------------------------
