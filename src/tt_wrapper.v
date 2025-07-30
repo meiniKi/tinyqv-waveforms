@@ -34,8 +34,7 @@ module tt_um_tqv_peripheral_harness (
   always @(negedge clk) rst_reg_n <= rst_n;
 
   // The peripheral under test.
-  // **** Change the module name from tqvp_example to match your peripheral. ****
-  tqvp_example tqvp_meiniKi_waveforms(
+  tqvp_meiniKi_waveforms tqvp_waveforms(
     .clk(clk),
     .rst_n(rst_reg_n),
     .ui_in(ui_in_sync),

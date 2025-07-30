@@ -6,7 +6,23 @@ SIM ?= icarus
 TOPLEVEL_LANG ?= verilog
 SRC_DIR = $(PWD)/../src
 PROJECT_SOURCES = peripheral.sv
+
+ifneq ($(MODEL),yes)
+ADDITIONAL_SOURCES = tt_wrapper.v test_harness/*.sv
+SRC_DPI_SOCK = 
+SRC_DPI_JSON =
+INC_SOCK =
+INC_JSON =
+
+else 
 ADDITIONAL_SOURCES = tt_wrapper.v test_harness/*.sv $(PWD)/../simio/display/ssd1306_spi4.sv
+SRC_DPI_SOCK = $(PWD)/../simio/sock.sv/sock.c
+SRC_DPI_JSON = $(PWD)/../simio/JSON.sv/sv/util.sv $(PWD)/../simio/JSON.sv/sv/json.sv 
+INC_SOCK = $(PWD)/../simio/sock.sv/sock.sv
+INC_JSON = $(PWD)/../simio/JSON.sv/sv/json.svh
+
+endif
+
 
 ifneq ($(GATES),yes)
 
@@ -27,11 +43,6 @@ COMPILE_ARGS    += -DUNIT_DELAY=\#1
 VERILOG_SOURCES += $(PDK_ROOT)/sky130A/libs.ref/sky130_fd_sc_hd/verilog/primitives.v
 VERILOG_SOURCES += $(PDK_ROOT)/sky130A/libs.ref/sky130_fd_sc_hd/verilog/sky130_fd_sc_hd.v
 
-SRC_DPI_SOCK 	= $(PWD)/../simio/sock.sv/sock.c
-SRC_DPI_JSON	= $(PWD)/../simio/JSON.sv/sv/util.sv $(PWD)/../simio/JSON.sv/sv/json.sv 
-
-INC_SOCK = $(PWD)/../simio/sock.sv/sock.sv
-INC_JSON = $(PWD)/../simio/JSON.sv/sv/json.svh
 
 # this gets copied in by the GDS action workflow
 VERILOG_SOURCES += $(PWD)/gate_level_netlist.v
@@ -39,7 +50,12 @@ VERILOG_SOURCES += $(PWD)/gate_level_netlist.v
 endif
 
 # Allow sharing configuration between design and testbench via `include`:
-COMPILE_ARGS 		+= -I$(SRC_DIR) -I $(INC_SOCK) -I $(INC_JSON)
+COMPILE_ARGS 		+= -I$(SRC_DIR)
+
+ifeq ($(MODEL),yes)
+COMPILE_MODEL_ARGS  = -I $(INC_SOCK) -I $(INC_JSON)
+endif
+
 
 # Include the testbench sources:
 VERILOG_SOURCES += $(PWD)/tb.v

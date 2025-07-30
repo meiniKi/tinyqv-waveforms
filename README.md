@@ -29,7 +29,7 @@ Test your peripheral by replacing and extending the [example test](test/test.py#
 ## Submission checklist
 
 Before submitting your design, please check:
-- You have renamed the peripheral module from `tqvp_example` to something unique that makes sense for your design.
+- (done) You have renamed the peripheral module from `tqvp_example` to something unique that makes sense for your design.
 - You have created a [test script](test/test.py) that uses the `tqv` class to read and write your design's registers.
 - You have [documented your design](docs/info.md) and its registers.
 
