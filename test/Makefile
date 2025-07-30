@@ -6,35 +6,20 @@ SIM ?= icarus
 TOPLEVEL_LANG ?= verilog
 SRC_DIR = $(PWD)/../src
 PROJECT_SOURCES = peripheral.sv
-
-ifneq ($(MODEL),yes)
 ADDITIONAL_SOURCES = tt_wrapper.v test_harness/*.sv
-SRC_DPI_SOCK = 
-SRC_DPI_JSON =
-INC_SOCK =
-INC_JSON =
-
-else 
-ADDITIONAL_SOURCES = tt_wrapper.v test_harness/*.sv $(PWD)/../simio/display/ssd1306_spi4.sv
-SRC_DPI_SOCK = $(PWD)/../simio/sock.sv/sock.c
-SRC_DPI_JSON = $(PWD)/../simio/JSON.sv/sv/util.sv $(PWD)/../simio/JSON.sv/sv/json.sv 
-INC_SOCK = $(PWD)/../simio/sock.sv/sock.sv
-INC_JSON = $(PWD)/../simio/JSON.sv/sv/json.svh
-
-endif
-
 
 ifneq ($(GATES),yes)
 
 # RTL simulation:
 SIM_BUILD				= sim_build/rtl
+
 VERILOG_SOURCES += $(addprefix $(SRC_DIR)/,$(PROJECT_SOURCES))
 VERILOG_SOURCES += $(addprefix $(SRC_DIR)/,$(ADDITIONAL_SOURCES))
 
 else
 
 # Gate level simulation:
-SIM_BUILD				= sim_build/gl
+SIM_BUILD		 = sim_build/gl
 COMPILE_ARGS    += -DGL_TEST
 COMPILE_ARGS    += -DFUNCTIONAL
 COMPILE_ARGS    += -DUSE_POWER_PINS
@@ -42,7 +27,6 @@ COMPILE_ARGS    += -DSIM
 COMPILE_ARGS    += -DUNIT_DELAY=\#1
 VERILOG_SOURCES += $(PDK_ROOT)/sky130A/libs.ref/sky130_fd_sc_hd/verilog/primitives.v
 VERILOG_SOURCES += $(PDK_ROOT)/sky130A/libs.ref/sky130_fd_sc_hd/verilog/sky130_fd_sc_hd.v
-
 
 # this gets copied in by the GDS action workflow
 VERILOG_SOURCES += $(PWD)/gate_level_netlist.v
@@ -52,10 +36,10 @@ endif
 # Allow sharing configuration between design and testbench via `include`:
 COMPILE_ARGS 		+= -I$(SRC_DIR)
 
-ifeq ($(MODEL),yes)
-COMPILE_MODEL_ARGS  = -I $(INC_SOCK) -I $(INC_JSON)
+ifeq ($(SIM),verilator)
+COMPILE_ARGS 		+= --timing
+EXTRA_ARGS 			+= --trace --trace-structs
 endif
-
 
 # Include the testbench sources:
 VERILOG_SOURCES += $(PWD)/tb.v

@@ -54,7 +54,6 @@ module tqvp_meiniKi_waveforms (
   logic oled_dc_r, oled_dc_n;
 
   logic [7:0] tx_r, tx_n;
-  logic [2:0] cnt_r, cnt_n;
 
   logic [3:0] presc_r, presc_n;
   logic [3:0] cnt_presc_r, cnt_presc_n;
@@ -111,6 +110,8 @@ module tqvp_meiniKi_waveforms (
             cnt_px_n = 'd8;
             state_n = PIXEL;
           end
+
+          default: begin end
 
         endcase
 
