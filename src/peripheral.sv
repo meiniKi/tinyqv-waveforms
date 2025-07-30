@@ -30,16 +30,16 @@ module tqvp_meiniKi_waveforms (
 
   // w) 000: send pixel data to active track
   //-->// w) 001: send pixel data RLE transitions
-  // w) 010: tunnel SPI data
+  // 
   // w) 011: set {CS, DC, prescaler}          --> must be deselected while sending data
   // w) 100: set cursor to track
   // r) 1xx: get status
 
   //localparam CMD_RLE      = 5'b1_0001; only if area sufficient
-  localparam CMD_PIXEL    = 5'b1_0000;
-  localparam CMD_SPI      = 5'b1_0001;
-  localparam CMD_DC_PRESC = 5'b1_0010;
-  localparam CMD_SEL      = 5'b1_1000;
+  localparam CMD_PIXEL    = 5'b1_0000;  // byte of pixels
+  localparam CMD_SPI      = 5'b1_0001;  // tunnel SPI data
+  localparam CMD_DC_PRESC = 5'b1_0010;  // wire 0010: set 1'cs_1'dc_4'prescaler
+  localparam CMD_SEL      = 5'b1_1000;  // select page; column must be take care of manually
   localparam CMD_STATUS   = 5'b0_1000;
   // Todo: modify mapping and introduce dont-cares
 
@@ -60,7 +60,7 @@ module tqvp_meiniKi_waveforms (
   logic [3:0] cnt_presc_r, cnt_presc_n;
   logic [4:0] cnt_hbit_r, cnt_hbit_n;
   logic [7:0] bfr_r, bfr_n;
-  logic [2:0] cnt_px_r, cnt_px_n;
+  logic [3:0] cnt_px_r, cnt_px_n; // should i care saving the 1 reg? let's check the area
 
   assign uo_out[1]    = sck_r;
   assign uo_out[2]    = tx_r[7];
@@ -73,7 +73,7 @@ module tqvp_meiniKi_waveforms (
   assign data_out     = {7'b0, state_r == IDLE};
 
   always_comb begin
-    tx_n          = tx_r << 1;
+    tx_n          = tx_r;
     state_n       = state_r;
     cnt_presc_n   = cnt_presc_r - 'b1;
     presc_n       = presc_r;
@@ -108,7 +108,7 @@ module tqvp_meiniKi_waveforms (
           end
 
           CMD_PIXEL: begin
-            cnt_px_n = 'd0;
+            cnt_px_n = 'd8;
             state_n = PIXEL;
           end
 
@@ -156,11 +156,11 @@ module tqvp_meiniKi_waveforms (
       end
       // ---
       PIXEL: begin
-        cnt_px_n = cnt_px_r - 'b1;
         cnt_presc_n = presc_r;
         cnt_hbit_n  = 'd16;
+        cnt_px_n = cnt_px_r - 'b1;
 
-        if (~|cnt_px_r) begin
+        if (|cnt_px_n) begin
           state_n       = SPI_TX;
           state_cont_n  = PIXEL;
           bfr_n         = bfr_r << 1;
@@ -175,6 +175,7 @@ module tqvp_meiniKi_waveforms (
       // ---
       SPI_TX: begin
         if (tick) begin
+          cnt_presc_n = presc_r;
           cnt_hbit_n = cnt_hbit_r - 'b1;
 
           if (~|(cnt_hbit_r - 'b1)) begin
@@ -200,16 +201,17 @@ always_ff @(posedge clk) begin
   state_cont_r  <= state_cont_n;
   bfr_r         <= bfr_n;
   cnt_px_r      <= cnt_px_n;
+  tx_r          <= tx_n;
 
   if (~rst_n) begin
-    state_r     <= IDLE;
-    sck_r       <= CPOL;
-    presc_r     <= 4'b100;
-    cnt_hbit_r  <= 'b0;
-    cs_r        <= 'b1;
-    oled_dc_r   <= oled_dc_n;
-    state_cont_r <= IDLE;
-    bfr_r       <= 'b0;
+    state_r       <= IDLE;
+    sck_r         <= CPOL;
+    presc_r       <= 4'b100;
+    cnt_hbit_r    <= 'b0;
+    cs_r          <= 'b1;
+    oled_dc_r     <= 'b0;
+    state_cont_r  <= IDLE;
+    bfr_r         <= 'b0;
   end else begin
     state_r     <= state_n;
     // SCK

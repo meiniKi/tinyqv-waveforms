@@ -45,13 +45,25 @@ module tb ();
       .rst_n  (rst_n)     // not reset
   );
 
+  (* keep *) wire tst_cs;
+  (* keep *) wire tst_sd;
+  (* keep *) wire tst_sck;
+  (* keep *) wire tst_dc;
+
+  assign tst_cs   = uo_out[3];
+  assign tst_sd   = uo_out[2];
+  assign tst_sck  = uo_out[1];
+  assign tst_dc   = uo_out[4];
+
 `ifdef MODEL
   ssd1306_spi4 i_ssd1306_spi4 (
-    .cs_in  ( uio_out[3] ),
-    .sdi_i  ( uio_out[2] ),
-    .sck_i  ( uio_out[1] ),
-    .dc_i   ( uio_out[4] )
+    .cs_in  ( uo_out[3] ),
+    .sdi_i  ( uo_out[2] ),
+    .sck_i  ( uo_out[1] ),
+    .dc_i   ( uo_out[4] )
   );
 `endif
+
+
 
 endmodule
