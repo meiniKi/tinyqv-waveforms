@@ -11,28 +11,33 @@ You can also include images in this folder and reference them in the markdown. E
 512 kb in size, and the combined size of all images must be less than 1 MB.
 -->
 
-# Your project title
+# TinyQV Waveforms
 
-Author: 
+Author: Meinhard Kissich
 
 Peripheral index: 
 
 ## What it does
 
-Explain what your peripheral does and how it works
+TODO
 
 ## Register map
 
 Document the registers that are used to interact with your peripheral
 
-| Address | Name  | Access | Description                                                         |
-|---------|-------|--------|---------------------------------------------------------------------|
-| 0x00    | DATA  | R/W    | A byte of data                                                      |
+| Address | Name   | Access | Description                                                 |
+| ------- | ------ | ------ | ----------------------------------------------------------- |
+| 0x00    | DATA   | W      | Byte of binary logic-level data; 8 sequential states        |
+| 0x01    | SPI    | W      | Byte of SPI data to tunnel to the display                   |
+| 0x02    | CONF   | W      | Set of config data: CS, DC, prescaler[3:0]                  |
+| 0x08    | SEL    | W      | Select the signal track to update                           |
+| 0x8     | STATUS | R      | Indicator if the peripheral is ready (0x01), or busy (0x00) |
+|         |        |        |                                                             |
 
 ## How to test
 
-Explain how to use your project
+TODO
 
 ## External hardware
 
-List external hardware used in your project (e.g. PMOD, LED display, etc), if any
+SSD1306 or compatible (SPI).

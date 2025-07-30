@@ -36,7 +36,7 @@ module tqvp_meiniKi_waveforms (
   // r) 1xx: get status
 
   //localparam CMD_RLE      = 5'b1_0001; only if area sufficient
-  localparam CMD_PIXEL    = 5'b1_0000;  // byte of pixels
+  localparam CMD_DATA     = 5'b1_0000;  // byte of pixels
   localparam CMD_SPI      = 5'b1_0001;  // tunnel SPI data
   localparam CMD_DC_PRESC = 5'b1_0010;  // wire 0010: set 1'cs_1'dc_4'prescaler
   localparam CMD_SEL      = 5'b1_1000;  // select page; column must be take care of manually
@@ -107,7 +107,7 @@ module tqvp_meiniKi_waveforms (
             state_n = ADDR1;
           end
 
-          CMD_PIXEL: begin
+          CMD_DATA: begin
             cnt_px_n = 'd8;
             state_n = PIXEL;
           end
