@@ -56,7 +56,7 @@ module tb ();
   assign tst_dc   = uo_out[4];
 
 `ifdef MODEL
-  ssd1306_spi4 i_ssd1306_spi4 (
+  simio_ssd1306_spi4 i_ssd1306_spi4 (
     .cs_in  ( uo_out[3] ),
     .sdi_i  ( uo_out[2] ),
     .sck_i  ( uo_out[1] ),

@@ -38,7 +38,19 @@ COMPILE_ARGS 		+= -I$(SRC_DIR)
 
 ifeq ($(SIM),verilator)
 COMPILE_ARGS 		+= --timing
-EXTRA_ARGS 			+= --trace --trace-structs
+EXTRA_ARGS 			+= --trace
+endif
+
+
+ifeq ($(MODEL),yes)
+SRC_DPI_JSON = ../simio/JSON.sv/sv/util.sv ../simio/JSON.sv/sv/json.sv
+SRC_MODELS_GUI = ../../simio/sock.sv/sock.c $(SRC_DPI_JSON) ../../simio/components/verilog/ssd1306/simio_ssd1306_spi4.sv
+
+INC_SOCK = ../simio/sock.sv/sock.sv
+INC_JSON = ../simio/JSON.sv/sv/json.svh
+
+VERILOG_SOURCES += $(SRC_MODELS_GUI)
+COMPILE_ARGS += -I $(INC_JSON) -I  $(INC_SOCK) --relative-includes --build -DMODEL
 endif
 
 # Include the testbench sources:

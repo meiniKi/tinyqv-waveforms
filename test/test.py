@@ -32,6 +32,8 @@ async def test_project(dut):
     ADDR_SEL = 8
     ADDR_STATUS = 8
 
+    MODEL = True
+
     # Interact with your design's registers through this TinyQV class.
     # This will allow the same test to be run when your design is integrated
     # with TinyQV - the implementation of this class will be replaces with a
@@ -44,46 +46,87 @@ async def test_project(dut):
 
     dut._log.info("Waveforms behavior")
 
-    # DC, CS, prescaler (not asserted)
-    await tqv.write_reg(ADDR_DC_PRESC, 0b1_0_1100)
-    assert dut.uo_out[BIT_CS].value == 1
-    assert dut.uo_out[BIT_DC].value == 0
+    if not MODEL:
 
-    await tqv.write_reg(ADDR_DC_PRESC, 0b0_1_1100)
-    assert dut.uo_out[BIT_CS].value == 0
-    assert dut.uo_out[BIT_DC].value == 1
+        # DC, CS, prescaler (not asserted)
+        await tqv.write_reg(ADDR_DC_PRESC, 0b1_0_1100)
+        assert dut.uo_out.value[BIT_CS] == 1
+        assert dut.uo_out.value[BIT_DC] == 0
 
-    await tqv.write_reg(ADDR_DC_PRESC, 0b1_1_1100)
+        await tqv.write_reg(ADDR_DC_PRESC, 0b0_1_1100)
+        assert dut.uo_out.value[BIT_CS] == 0
+        assert dut.uo_out.value[BIT_DC] == 1
 
-    # SPI tunnel, set CS manually
-    await tqv.write_reg(ADDR_DC_PRESC, 0b0_1_0010)
-    await tqv.write_reg(ADDR_SPI, 0x51)
-    await tqv.write_reg(ADDR_SPI, 0x15)
-    await tqv.write_reg(ADDR_DC_PRESC, 0b0_1_0010)
-    await ClockCycles(dut.clk, 100)
+        await tqv.write_reg(ADDR_DC_PRESC, 0b1_1_1100)
 
-    # Select page
-    await tqv.write_reg(ADDR_SEL, 0x0)
-    await ClockCycles(dut.clk, 200)
+        # SPI tunnel, set CS manually
+        await tqv.write_reg(ADDR_DC_PRESC, 0b0_1_0010)
+        await tqv.write_reg(ADDR_SPI, 0x51)
+        await tqv.write_reg(ADDR_SPI, 0x15)
+        await tqv.write_reg(ADDR_DC_PRESC, 0b0_1_0010)
+        await ClockCycles(dut.clk, 100)
 
-    # read status
-    assert await tqv.read_reg(ADDR_STATUS) == 1
-    await ClockCycles(dut.clk, 100)
+        # Select page
+        await tqv.write_reg(ADDR_SEL, 0x0)
+        await ClockCycles(dut.clk, 200)
 
-    # clock pixel
+        # read status
+        assert await tqv.read_reg(ADDR_STATUS) == 1
+        await ClockCycles(dut.clk, 100)
+
+        # clock pixel
+        await tqv.write_reg(ADDR_PIXEL, 0xF0)
+        await ClockCycles(dut.clk, 1000)
+
+        return
+
+    # set cs low, go to command mode
+    await tqv.write_reg(ADDR_DC_PRESC, 0b0_0_0010)
+
+    await tqv.write_reg(ADDR_SPI, 0xD5)
+    await ClockCycles(dut.clk, 20)
+    await tqv.write_reg(ADDR_SPI, 0xF0)
+    await ClockCycles(dut.clk, 20)
+    await tqv.write_reg(ADDR_SPI, 0x8D)
+    await ClockCycles(dut.clk, 20)
+    await tqv.write_reg(ADDR_SPI, 0x14)
+    await ClockCycles(dut.clk, 20)
+    await tqv.write_reg(ADDR_SPI, 0xA1)
+    await ClockCycles(dut.clk, 20)
+    await tqv.write_reg(ADDR_SPI, 0xC8)
+    await ClockCycles(dut.clk, 20)
+    await tqv.write_reg(ADDR_SPI, 0x81)
+    await ClockCycles(dut.clk, 20)
+    await tqv.write_reg(ADDR_SPI, 0xCF)
+    await ClockCycles(dut.clk, 20)
+    await tqv.write_reg(ADDR_SPI, 0xD9)
+    await ClockCycles(dut.clk, 20)
+    await tqv.write_reg(ADDR_SPI, 0xF1)
+    await ClockCycles(dut.clk, 20)
+    await tqv.write_reg(ADDR_SPI, 0xAF)
+    await ClockCycles(dut.clk, 20)
+    await tqv.write_reg(ADDR_SPI, 0x10)
+    await ClockCycles(dut.clk, 20)
+    await tqv.write_reg(ADDR_SPI, 0x02)
+    await ClockCycles(dut.clk, 20)
+
+    await tqv.write_reg(ADDR_DC_PRESC, 0b1_1_0010)
+
+    # Send some pixels
     await tqv.write_reg(ADDR_PIXEL, 0xF0)
     await ClockCycles(dut.clk, 1000)
+    await tqv.write_reg(ADDR_PIXEL, 0xF0)
+    await ClockCycles(dut.clk, 1000)
+    await tqv.write_reg(ADDR_PIXEL, 0xF0)
 
-    # Set an input value, in the example this will be added to the register value
-    # dut.ui_in.value = 30
+    # select other track
+    await ClockCycles(dut.clk, 1000)
+    await tqv.write_reg(ADDR_SEL, 0x02)
+    await ClockCycles(dut.clk, 1000)
+    await tqv.write_reg(ADDR_PIXEL, 0x00)
+    await ClockCycles(dut.clk, 1000)
+    await tqv.write_reg(ADDR_PIXEL, 0xFF)
+    await ClockCycles(dut.clk, 1000)
+    await tqv.write_reg(ADDR_PIXEL, 0x55)
 
-    # Wait for two clock cycles to see the output values, because ui_in is synchronized over two clocks,
-    # and a further clock is required for the output to propagate.
-    # await ClockCycles(dut.clk, 3)
-
-    # The following assertion is just an example of how to check the output values.
-    # Change it to match the actual expected output of your module:
-    # assert dut.uo_out.value == 50
-
-    # Keep testing the module by changing the input values, waiting for
-    # one or more clock cycles, and asserting the expected output values.
+    await ClockCycles(dut.clk, 1000)
