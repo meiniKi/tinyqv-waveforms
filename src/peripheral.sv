@@ -43,13 +43,14 @@ module tqvp_meiniKi_waveforms (
   localparam CMD_STATUS   = 5'b0_1000;
   // Todo: modify mapping and introduce dont-cares
 
-  enum int unsigned { IDLE, SPI_TX, ADDR1, ADDR2, ADDR3, ADDR4, ADDR5, PIXEL } state_r, state_n, state_cont_r, state_cont_n;
+  enum int unsigned { IDLE, SPI_TX, SEL, PIXEL, PULL_DC } state_r, state_n, state_cont_r, state_cont_n;
 
   logic sck_r, sck_n;
   logic tick;
   logic done;
 
   logic cs_r, cs_n;
+  logic gnd_r, gnd_n;
 
   logic oled_dc_r, oled_dc_n;
 
@@ -82,6 +83,7 @@ module tqvp_meiniKi_waveforms (
     state_cont_n  = state_cont_r;
     bfr_n         = bfr_r;
     cnt_px_n      = cnt_px_r;
+    gnd_n         = gnd_r;
 
     case(state_r)
       IDLE: begin
@@ -94,6 +96,7 @@ module tqvp_meiniKi_waveforms (
             presc_n   = data_in[3:0];
             oled_dc_n = data_in[4];
             cs_n      = data_in[5];
+            gnd_n     = data_in[6];
           end
 
           CMD_SPI: begin
@@ -103,7 +106,8 @@ module tqvp_meiniKi_waveforms (
           end
 
           CMD_SEL: begin
-            state_n = ADDR1;
+            state_n = SEL;
+            cnt_presc_n = presc_r;
           end
 
           CMD_DATA: begin
@@ -117,42 +121,14 @@ module tqvp_meiniKi_waveforms (
 
       end
       // ---
-      ADDR1: begin
-        oled_dc_n = 1'b0;
+      SEL: begin
+        oled_dc_n     = 1'b0;
+        tx_n          = {5'b10110, bfr_r[2:0]};
+        cnt_hbit_n    = 'd16;
+        state_cont_n  = PULL_DC;
         if (tick) begin
-          state_n = ADDR2;
-        end
-      end
-      // ---
-      ADDR2: begin
-        tx_n        = 8'h22;
-        state_n     = SPI_TX;
-        cnt_hbit_n  = 'd16;
-        cnt_presc_n = presc_r;
-        state_cont_n = ADDR3;
-      end
-      // ---
-      ADDR3: begin
-        tx_n        = 8'h00;
-        state_n     = SPI_TX;
-        cnt_hbit_n  = 'd16;
-        cnt_presc_n = presc_r;
-        state_cont_n = ADDR4;
-      end
-      // ---
-      ADDR4: begin
-        tx_n        = bfr_r;
-        state_n     = SPI_TX;
-        cnt_hbit_n  = 'd16;
-        cnt_presc_n = presc_r;
-        state_cont_n = ADDR5;
-      end
-      // ---
-      ADDR5: begin
-        oled_dc_n     = 1'b1;
-        state_cont_n  = IDLE;
-        if (tick) begin
-          state_n = IDLE;
+          state_n = SPI_TX;
+          cnt_presc_n = presc_r;
         end
       end
       // ---
@@ -161,12 +137,12 @@ module tqvp_meiniKi_waveforms (
         cnt_hbit_n  = 'd16;
         cnt_px_n = cnt_px_r - 'b1;
 
-        if (|cnt_px_n) begin
+        if (|cnt_px_r) begin
           state_n       = SPI_TX;
           state_cont_n  = PIXEL;
           bfr_n         = bfr_r << 1;
-          if (bfr_r[7]) tx_n = 8'h80;
-          else          tx_n = 8'h01;
+          if (bfr_r[7]) tx_n = {gnd_r, 7'h02};
+          else          tx_n = {gnd_r, 7'h40};
         end else begin
           state_cont_n  = IDLE;
           state_n       = IDLE;
@@ -189,6 +165,11 @@ module tqvp_meiniKi_waveforms (
         end
       end
       // ---
+      PULL_DC: begin
+        oled_dc_n     = 1'b1;
+        state_cont_n  = IDLE;
+        state_n       = IDLE;
+      end
 
     endcase
   end
@@ -203,6 +184,7 @@ always_ff @(posedge clk) begin
   bfr_r         <= bfr_n;
   cnt_px_r      <= cnt_px_n;
   tx_r          <= tx_n;
+  gnd_r         <= gnd_n;
 
   if (~rst_n) begin
     state_r       <= IDLE;
@@ -213,6 +195,7 @@ always_ff @(posedge clk) begin
     oled_dc_r     <= 'b0;
     state_cont_r  <= IDLE;
     bfr_r         <= 'b0;
+    gnd_r         <= 'b0;
   end else begin
     state_r     <= state_n;
     // SCK
