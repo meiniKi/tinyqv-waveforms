@@ -12,9 +12,10 @@ module tqvp_meiniKi_waveforms (
     input         clk,          // Clock - the TinyQV project clock is normally set to 64MHz.
     input         rst_n,        // Reset_n - low to reset.
 
+    /* verilator lint_off UNUSEDSIGNAL */
     input  [7:0]  ui_in,        // The input PMOD, always available.  Note that ui_in[7] is normally used for UART RX.
                                 // The inputs are synchronized to the clock, note this will introduce 2 cycles of delay on the inputs.
-
+    /* verilator lint_on UNUSEDSIGNAL */
     output [7:0]  uo_out,       // The output PMOD.  Each wire is only connected if this peripheral is selected.
                                 // Note that uo_out[0] is normally used for UART TX.
 
@@ -40,12 +41,12 @@ module tqvp_meiniKi_waveforms (
   localparam CMD_SPI      = 5'b1_0001;  // tunnel SPI data
   localparam CMD_DC_PRESC = 5'b1_0010;  // wire 0010: set 1'cs_1'dc_4'prescaler
   localparam CMD_SEL      = 5'b1_1000;  // select page; column must be take care of manually
-  localparam CMD_STATUS   = 5'b0_1000;
+  //localparam CMD_STATUS   = 5'b0_1000;
   // Todo: modify mapping and introduce dont-cares
 
   enum int unsigned { IDLE, SPI_TX, SEL, PIXEL, PULL_DC } state_r, state_n, state_cont_r, state_cont_n;
 
-  logic sck_r, sck_n;
+  logic sck_r;
   logic tick;
   logic done;
 
@@ -62,6 +63,7 @@ module tqvp_meiniKi_waveforms (
   logic [7:0] bfr_r, bfr_n;
   logic [3:0] cnt_px_r, cnt_px_n; // should i care saving the 1 reg? let's check the area
 
+  assign uo_out[0]    = 1'b0;
   assign uo_out[1]    = sck_r;
   assign uo_out[2]    = tx_r[7];
   assign uo_out[3]    = cs_r & (state_r != SPI_TX) & (state_n != SPI_TX);
