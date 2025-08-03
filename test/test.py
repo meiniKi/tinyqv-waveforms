@@ -110,7 +110,7 @@ async def test_project(dut):
     await tqv.write_reg(ADDR_SPI, 0x02)
     await ClockCycles(dut.clk, 20)
 
-    await tqv.write_reg(ADDR_DC_PRESC, 0b1_1_0001)
+    await tqv.write_reg(ADDR_DC_PRESC, 0b0_1_1_0001)
 
     # Row 0: low freq, start low
     await tqv.write_reg(ADDR_SEL, 0)
@@ -134,18 +134,25 @@ async def test_project(dut):
         await tqv.write_reg(ADDR_PIXEL, 0xFF)
         await ClockCycles(dut.clk, 500)
 
+    # Set header on
+    await tqv.write_reg(ADDR_DC_PRESC, 0b1_0_1_1_0001)
+
     # Row 4: high freq, start low
     await tqv.write_reg(ADDR_SEL, 4)
     await ClockCycles(dut.clk, 1000)
-    for i in range(128 // 8):
+    for i in range(128 // 8 - 1):
         await tqv.write_reg(ADDR_PIXEL, 0xF0)
         await ClockCycles(dut.clk, 500)
 
     # Row 6: alternating starting high
     await tqv.write_reg(ADDR_SEL, 6)
     await ClockCycles(dut.clk, 1000)
-    for i in range(128 // 8):
+    for i in range(128 // 8 - 1):
         await tqv.write_reg(ADDR_PIXEL, 0b11001100)
         await ClockCycles(dut.clk, 500)
+
+    for i in range(8):
+        await tqv.write_reg(ADDR_SEL, i)
+        await ClockCycles(dut.clk, 1000)
 
     await ClockCycles(dut.clk, 1000)
