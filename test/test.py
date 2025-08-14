@@ -47,7 +47,6 @@ async def test_project(dut):
     dut._log.info("Waveforms behavior")
 
     if not MODEL:
-
         # DC, CS, prescaler (not asserted)
         await tqv.write_reg(ADDR_DC_PRESC, 0b1_0_1100)
         assert dut.uo_out.value[BIT_CS] == 1
@@ -110,7 +109,7 @@ async def test_project(dut):
     await tqv.write_reg(ADDR_SPI, 0x02)
     await ClockCycles(dut.clk, 20)
 
-    await tqv.write_reg(ADDR_DC_PRESC, 0b0_1_1_0001)
+    await tqv.write_reg(ADDR_DC_PRESC, 0b1_1_1_0001)
 
     # Row 0: low freq, start low
     await tqv.write_reg(ADDR_SEL, 0)
@@ -135,7 +134,40 @@ async def test_project(dut):
         await ClockCycles(dut.clk, 500)
 
     # Set header on
-    await tqv.write_reg(ADDR_DC_PRESC, 0b1_0_1_1_0001)
+    await tqv.write_reg(ADDR_DC_PRESC, 0b1_1_1_1_0001)
+
+    # Row 1/3/7 low
+    for r in [1,3,5,7]:
+        await tqv.write_reg(ADDR_SEL, r)
+        await ClockCycles(dut.clk, 1000)
+        for _ in range(128 // 16):
+            await tqv.write_reg(ADDR_PIXEL, 0x00)
+            await ClockCycles(dut.clk, 500)
+            #await tqv.write_reg(ADDR_PIXEL, 0b00110011)
+            await tqv.write_reg(ADDR_PIXEL, 0x00)
+            await ClockCycles(dut.clk, 500)
+
+    # Row 0/2 rewrite without ground line
+    await tqv.write_reg(ADDR_SEL, 0)
+    await ClockCycles(dut.clk, 1000)
+    for _ in range(128 // 32):
+        await tqv.write_reg(ADDR_PIXEL, 0x00)
+        await ClockCycles(dut.clk, 500)
+        await tqv.write_reg(ADDR_PIXEL, 0x00)
+        await ClockCycles(dut.clk, 500)
+        await tqv.write_reg(ADDR_PIXEL, 0xFF)
+        await ClockCycles(dut.clk, 500)
+        await tqv.write_reg(ADDR_PIXEL, 0xFF)
+        await ClockCycles(dut.clk, 500)
+
+    # Row 2: med freq, start high
+    await tqv.write_reg(ADDR_SEL, 2)
+    await ClockCycles(dut.clk, 1000)
+    for _ in range(128 // 16):
+        await tqv.write_reg(ADDR_PIXEL, 0x00)
+        await ClockCycles(dut.clk, 500)
+        await tqv.write_reg(ADDR_PIXEL, 0xFF)
+        await ClockCycles(dut.clk, 500)
 
     # Row 4: high freq, start low
     await tqv.write_reg(ADDR_SEL, 4)

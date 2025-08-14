@@ -1,0 +1,5 @@
+
+read_verilog -sv -defer src/font.sv
+read_verilog -sv -defer src/peripheral.sv
+
+synth_ice40

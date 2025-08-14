@@ -180,7 +180,7 @@ module tqvp_meiniKi_waveforms (
           state_cont_n  = PIXEL;
           bfr_n         = bfr_r << 1;
           if (bfr_r[7]) tx_n = {conf_gnd_r, 7'h02};
-          else          tx_n = {conf_gnd_r, 7'h40};
+          else          tx_n = {conf_gnd_r, 7'h20};
         end else begin
           state_cont_n  = IDLE;
           state_n       = IDLE;
