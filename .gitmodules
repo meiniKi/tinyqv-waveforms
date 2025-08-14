@@ -1,0 +1,3 @@
+[submodule "simio"]
+	path = simio
+	url = git@github.com:meiniKi/simio.git
