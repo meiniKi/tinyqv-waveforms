@@ -15,7 +15,7 @@ You can also include images in this folder and reference them in the markdown. E
 
 Author: Meinhard Kissich
 
-Peripheral index: 
+Peripheral index: 16
 
 ## What it does
 
