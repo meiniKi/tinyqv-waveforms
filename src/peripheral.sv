@@ -28,20 +28,12 @@ module tqvp_meiniKi_waveforms (
 
   localparam CPOL = 0;
 
-  // w) 000: send pixel data to active track
-  //-->// w) 001: send pixel data RLE transitions
-  // 
-  // w) 011: set {CS, DC, prescaler}          --> must be deselected while sending data
-  // w) 100: set cursor to track
-  // r) 1xx: get status
-
-  //localparam CMD_RLE      = 5'b1_0001; only if area sufficient
-  localparam CMD_DATA     = 5'b1_0000;  // byte of pixels
-  localparam CMD_SPI      = 5'b1_0001;  // tunnel SPI data
-  localparam CMD_DC_PRESC = 5'b1_0010;  // wire 0010: set 1'cs_1'dc_4'prescaler
-  localparam CMD_SEL      = 5'b1_1000;  // select page; column must be take care of manually
-  //localparam CMD_STATUS   = 5'b0_1000;
-  // Todo: modify mapping and introduce dont-cares
+  // See documentation
+  localparam CMD_DATA     = 5'b1_0000;
+  localparam CMD_SPI      = 5'b1_0001;
+  localparam CMD_DC_PRESC = 5'b1_0010;
+  localparam CMD_SEL      = 5'b1_1000;
+  //
 
   enum int unsigned { IDLE, SPI_TX, SEL, SEL_DONE, PIXEL, HEADER, PULL_DC } state_r, state_n, state_cont_r, state_cont_n;
 
@@ -61,7 +53,7 @@ module tqvp_meiniKi_waveforms (
   logic [3:0] cnt_presc_r, cnt_presc_n;
   logic [4:0] cnt_hbit_r, cnt_hbit_n;
   logic [7:0] bfr_r, bfr_n;
-  logic [3:0] cnt_px_r, cnt_px_n; // should i care saving the 1 reg? let's check the area
+  logic [3:0] cnt_px_r, cnt_px_n;
   logic [2:0] header_cnt_r, header_cnt_n;
 
   assign uo_out[0]    = 1'b0;
