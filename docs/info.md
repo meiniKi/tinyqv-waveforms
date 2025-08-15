@@ -15,15 +15,15 @@ You can also include images in this folder and reference them in the markdown. E
 
 Author: Meinhard Kissich
 
-Peripheral index: 16
+Peripheral index: 25
 
 ## What it does
 
-Have you ever wanted to display some nice logic-level waves on an OLED display, but your bit-serial RISC-V core was not powerful enough to feed the graphics data to the display fast enough? Maybe not, but anyway, you can do it now. The tinyQV-Waveforms peripheral takes care of moving around all graphics data. You only need to select a channel (track) and write the binary data (1 byte, i.e., 8 sequential data points) to the peripheral. Everything else is automatically handled in hardware. You can spend your precious and limited computing power of your bit-serial core on other tasks. Finally, the peripheral is optimized for area to avoid negating the advantage of a bit-serial core.
+Have you ever wanted to display some nice logic-level waves on an OLED display, but your bit-serial RISC-V core was not powerful enough to feed the graphics data to the display fast enough? Maybe not, but anyway, you can do it now. The tinyQV-Waveforms peripheral takes care of moving around all graphics data. You only need to select a channel (track) and write the binary data (1 byte at a time, i.e., 8 sequential data points) to the peripheral. Everything else is automatically handled in hardware. You can spend your precious and limited computing power of your bit-serial core on other tasks. Finally, the peripheral is optimized for area to avoid negating the advantage of a bit-serial core.
 
-| line numbers<br>no ground line | line numbers<br>ground line | no line numbers<br>no ground line |
-| ------------------------------ | --------------------------- | --------------------------------- |
-| ![](fig/demo1.png)             | ![](fig/demo2.png)          | ![](fig/demo3.png)                |
+| line numbers<br>no ground line    | line numbers<br>ground line       | no line numbers<br>no ground line |
+| --------------------------------- | --------------------------------- | --------------------------------- |
+| ![fig/25_demo1.png](25_demo1.png) | ![fig/25_demo2.png](25_demo2.png) | ![fig/25_demo3.png](25_demo3.png) |
 
 
 ## Connections
@@ -73,19 +73,19 @@ await tqv.write_reg(ADDR_PIXEL, 0x05)
 
 **Expected output**
 
-![](fig/example1.png)
+![fig/25_example1.png](25_example1.png)
 
 ## Register Map
 
 
-| Address | Name   | Access | Description                                                          |
-| ------- | ------ | ------ | -------------------------------------------------------------------- |
-| 0x00    | DATA   | W      | Byte of binary logic-level data; 8 sequential states                 |
-| 0x01    | SPI    | W      | Byte of SPI data to tunnel to the display                            |
+| Address | Name   | Access | Description                                                             |
+| ------- | ------ | ------ | ----------------------------------------------------------------------- |
+| 0x00    | DATA   | W      | Byte of binary logic-level data; 8 sequential states                    |
+| 0x01    | SPI    | W      | Byte of SPI data to tunnel to the display                               |
 | 0x02    | CONF   | W      | Set of config data: `EN_CHAN_NUMBERS, GND_LINE, CS, DC, prescaler[3:0]` |
-| 0x08    | SEL    | W      | Select the signal track to update                                    |
-| 0x8     | STATUS | R      | Indicator if the peripheral is ready (0x01), or busy (0x00)          |
-|         |        |        |                                                                      |
+| 0x08    | SEL    | W      | Select the signal track to update                                       |
+| 0x8     | STATUS | R      | Indicator if the peripheral is ready (0x01), or busy (0x00)             |
+|         |        |        |                                                                         |
 
 
 ## How to test
